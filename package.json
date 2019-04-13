@@ -1,12 +1,18 @@
 {
   "name": "pdf-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "Node server that generates PDF from Twig templates",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rooswelt/pdf-generator.git"
+  },
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "PORT=3000 node --inspect index.js",
+    "start": "node index.js"
   },
-  "author": "",
+  "author": "rooswelt83",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",

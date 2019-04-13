@@ -1,5 +1,9 @@
 
-FROM node:8.11.1-alpine
+FROM giacomofurlan/alpine-php-node
+
+#WORKDIR is /var/www/html
+COPY . /var/www/html/
+RUN npm install
 
 ENV NODE_DIR /var/www
 WORKDIR $NODE_DIR
@@ -7,8 +11,7 @@ WORKDIR $NODE_DIR
 # cache npm
 COPY package.json /tmp/
 RUN cd /tmp \
-    && npm install \
-    && apk del .build-deps
+    && npm install 
 
 COPY . $NODE_DIR
 RUN cp -a /tmp/node_modules $NODE_DIR/
