@@ -17,18 +17,27 @@ app.use(bodyParser.json());
 
 app.post('/export/html', (req, res) => {
     const templateName = req.body.templateName || 'test.twig';
-    const data = req.body.data || {};
-    res.render(templateName, data);
+    const data = req.body || {};
+    console.log(data);
+    res.render(templateName, {
+        context: {
+            data: data,
+        }
+    });
 })
 
 app.post('/export/pdf', (req, res) => {
     (async () => {
         try {
             const templateName = req.body.templateName || 'test.twig';
-            const data = req.body.data || {};
+            const data = req.body || {};
             const browser = await puppeteer.launch()
             const page = await browser.newPage()
-            const html = await renderHTML(templateName, data);
+            const html = await renderHTML(templateName, {
+                context: {
+                    data: data,
+                }
+            });
             await page.setContent(html);
             const buffer = await page.pdf({
                 format: 'A4'
