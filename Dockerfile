@@ -1,24 +1,20 @@
+FROM digitalkreativ/docker-php7.1-fpm-puppeteer
 
-FROM giacomofurlan/alpine-php-node
+# Copy the app
+COPY . /app/
 
-#WORKDIR is /var/www/html
-COPY . /var/www/html/
-RUN npm install
+WORKDIR /app
+RUN npm i
 
-ENV NODE_DIR /var/www
-WORKDIR $NODE_DIR
+# # Add user so we don't need --no-sandbox.
+RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && mkdir -p /home/pptruser/Downloads \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser ./node_modules
 
-# cache npm
-COPY package.json /tmp/
-RUN cd /tmp \
-    && npm install 
-
-COPY . $NODE_DIR
-RUN cp -a /tmp/node_modules $NODE_DIR/
-
-#HEALTHCHECK --interval=5s --timeout=3s \
-#    CMD curl --silent --fail http://localhost:3000/ping || exit 1
+# Run everything after as non-privileged user.
+USER pptruser
 
 EXPOSE 3000
 
-CMD [ "npm", "start" ]
+CMD ["npm", "run", "start"]
