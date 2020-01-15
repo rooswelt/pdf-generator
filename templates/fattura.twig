@@ -1,0 +1,226 @@
+<head>
+	<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.css" integrity="sha256-Qgs9aOh8GQNw2SjFHa/00CdgPnsh1Qca+zZAyiCByck=" rel="stylesheet"/>
+</head>
+<style>
+	/* latin-ext */
+	@font-face {
+		font-family: 'Bree Serif';
+		font-style: normal;
+		font-weight: 400;
+		src: local('Bree Serif Regular'), local('BreeSerif-Regular'), url('https://fonts.gstatic.com/s/breeserif/v9/4UaHrEJCrhhnVA3DgluA96Tp57F2IwN-Pw.woff2') format('woff2');
+		unicode-range: U + 100-024F, U + 259, U + 1E00-1EFF, U + 2020, U + 20A0-20AB, U + 20AD-20CF, U + 2113, U + 2C60-2C7F, U+A720-A7FF;
+	}
+	/* latin */
+	@font-face {
+		font-family: 'Bree Serif';
+		font-style: normal;
+		font-weight: 400;
+		src: local('Bree Serif Regular'), local('BreeSerif-Regular'), url('https://fonts.gstatic.com/s/breeserif/v9/4UaHrEJCrhhnVA3DgluA96rp57F2IwM.woff2') format('woff2');
+		unicode-range: U + 0-00FF, U + 131, U + 152-0153, U + 2BB-02BC, U + 2C6, U + 2 DA, U + 2 DC, U + 2000-206F, U + 2074, U + 20 AC, U + 2122, U + 2191, U + 2193, U + 2212, U + 2215, U+FEFF, U+FFFD;
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: 'Bree Serif', serif;
+	}
+	body {
+		margin: 25px 55px;
+	}
+</style>
+<body>
+	<div class="row">
+
+		<div class="col-xs-6">
+			<h1>
+				<img
+				alt="Logo fattura" id="logo_fattura" src="{{data.logo}}"/>
+			<!--</a>-->
+			</h1>
+		</div>
+		<div class="col-xs-6 text-right">
+			<h3>[_] Ricevuta / [_] Fattura n.<span id="numerofattura">{{data.fattura.numerofattura}}</span>
+			</h3>
+			<h1>
+				<small>
+					<span id="dataemissione">{{data.fattura.dataemissione|date("d/m/Y")}}</span>
+				</small>
+			</h1>
+		</div>
+	</div>
+	<div class="row row-flex">
+		<div class="col-xs-6">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4>
+						<span id="report_fisioterapista">{{data.fisioterapista.titolo}}
+							{{data.fisioterapista.cognome}}
+							{{data.fisioterapista.nome}}</span>
+					</h4>
+				</div>
+				<div class="panel-body">
+					<div class="well">
+						<p>
+							<span id="report_specializzazione">
+								{{data.fisioterapista.specializzazione}}
+							</span><br>
+							{% if data.fisioterapista.piva %}
+								<span id="report_piva">P.IVA:
+									{{data.fisioterapista.piva}}</span>
+							{% endif %}
+							{% if data.fisioterapista.cf %}
+								<span id="report_cf">C.F.:
+									{{data.fisioterapista.cf}}</span>
+							{% endif %}
+							<br>
+							<!-- <span id="report_sedelegale"></span> <br> -->
+							<span id="report_indirizzo"></span>
+							<br>
+							<span id="report_email"></span>
+							<br>
+							<span id="report_telefono"></span>
+							<br>
+							<span id="report_cellulare"></span>
+							<br>
+							<span id="report_tesseraaifi"></span>
+							<br>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xs-6 col-xs-offset-4 text-right">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h4>Intestatario:
+						<span id="paziente_intestazione">
+							{% if data.fattura.cognomepaziente %}
+								{{data.fattura.cognomepaziente}}
+								{{data.fattura.nomepaziente}}
+							{% endif %}
+							{% if data.fattura.cognomeintestatario %}
+								{{data.fattura.cognomeintestatario}}
+								{{data.fattura.nomeintestatario}}
+							{% endif %}
+						</span>
+					</h4>
+				</div>
+				<div class="panel-body">
+					<div class="well">
+						<p>
+							<span id="paziente_intestazione_cf">
+								CF:
+								{% if data.fattura.cfpaziente %}
+									{{data.fattura.cfpaziente}}
+								{% endif %}
+								{% if data.fattura.cfintestatario %}
+									{{data.fattura.cfintestatario}}
+								{% endif %}
+							</span>
+							<br>
+							<span id="paziente_intestazione_piva"></span>
+							<br>
+							<span id="paziente_intestazione_residenza"></span>
+							<br>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table class="table table-bordered" id="tabella_prestazioni">
+		<thead>
+			<tr>
+				<th style="width: 50px;">
+					<h4>Qta</h4>
+				</th>
+				<th>
+					<h4>Descrizione</h4>
+				</th>
+				<th>
+					<h4>Importo</h4>
+				</th>
+			</tr>
+			{% set imponibile = 0 %}
+			{% set importo = data.fattura.totale %}
+			{% if ((data.fattura.pivapaziente or data.fattura.piva) and data.fattura.ritenutadiacconto > 0) %}
+				{% set importo = importo - data.fattura.ritenutadiacconto %}
+			{% endif %}
+
+			{% for prestazione in data.fattura.prestazioni %}
+				{% set imponibile = imponibile + prestazione.importo %}
+				<tr>
+					<td>{{prestazione.quantita}}</td>
+					<td>{{prestazione.descrizione}}</td>
+					<td class="text-right">{{prestazione.importo |number_format(2, '.', '')}}
+						&euro;</td>
+				</tr>
+			{% endfor %}
+		</thead>
+		<tbody>
+			<tr class="success">
+				<td class="text-right" colspan="2">
+					<b>Imponibile</b</td>
+				</td>
+				<td class="text-right">
+					<span id="imponibile">{{imponibile|number_format(2, '.', '')}}</span>
+					&euro;</td>
+			</tr>
+
+			{% if data.fattura.ritenutadiacconto is defined %}
+				<tr id="riga_ritenuta_acconto">
+					<td colspan="2" style="text-align: right;">
+						<strong>di cui ritenuta d'acconto (20%)</strong>
+					</td>
+					<td style="text-align: right;">
+						<span id="ritenuta_acconto" style="font-weight: bold;">{{data.fattura.ritenutadiacconto|number_format(2, '.', '')}}</span>
+						&euro;</td>
+				</tr>
+			{% endif %}
+
+			{% if data.fattura.iva %}
+				<tr id="riga_iva">
+					<td colspan="2" style="text-align: right;">
+						<strong>IVA</strong>
+					</td>
+					<td style="text-align: right;">
+						<span id="iva" style="font-weight: bold;">{{data.fattura.iva|number_format(2, '.', '')}}</span>
+						&euro;</td>
+				</tr>
+			{% endif %}
+			{% if data.fattura.bollo %}
+				<tr class="warning" id="riga_bollo">
+					<td colspan="2" style="text-align: right;">
+						<strong>Bollo</strong>
+					</td>
+					<td style="text-align: right;">
+						<span style="font-weight: bold;">2.00 &euro;</span>
+					</td>
+				</tr>
+			{% endif %}
+			<tr class="danger" id="riga_totale_con_bollo">
+				<td colspan="2" style="text-align: right;">
+					<strong>Totale</strong>
+				</td>
+				<td style="text-align: right;">
+					<span id="importo_totale_con_bollo" style="font-weight: bold;">{{importo|number_format(2, '.', '')}}</span>
+					&euro;</td>
+			</tr>
+		</tbody>
+	</table>
+	<hr>Note aggiuntive:
+	<div class="row">
+		<div class="col-sm-12" id="note-fattura">
+			{{data.fattura.note}}<br/><br/></div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12" id="note-fattura-da-profilo">{{data.fisioterapista.notefattura}}</div>
+	</div><hr>
+	<div class="col-sm-12">
+		Compenso esente da IVA (ex art. 10 n. 18 D.P.R. 633/1972)</div>
+</body>
