@@ -61,6 +61,7 @@ app.get("/export/pdf", (req, res) => {
             });
             res.type("application/pdf");
             res.send(buffer);
+            await page.close();
             browser.close();
         } catch (error) {
             console.log('Error', error);
